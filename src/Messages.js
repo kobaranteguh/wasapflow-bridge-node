@@ -125,6 +125,38 @@ class Messages {
     async interactive({ to, interactive } = {}) {
         return this._http.post('/messages/interactive', { to, interactive }, { headers: this._headers() });
     }
+
+    /**
+     * Send a location message.
+     * @param {object} opts
+     * @param {string} opts.to        - Recipient phone
+     * @param {number} opts.latitude  - Latitude
+     * @param {number} opts.longitude - Longitude
+     * @param {string} [opts.name]    - Location name
+     * @param {string} [opts.address] - Address string
+     */
+    async location({ to, latitude, longitude, name, address } = {}) {
+        return this._http.post('/messages/location', { to, latitude, longitude, name, address }, { headers: this._headers() });
+    }
+
+    /**
+     * Send an emoji reaction to a received message.
+     * @param {object} opts
+     * @param {string} opts.to         - Recipient phone
+     * @param {string} opts.message_id - wamid of the message to react to
+     * @param {string} opts.emoji      - Emoji character (e.g. "👍")
+     */
+    async reaction({ to, message_id, emoji } = {}) {
+        return this._http.post('/messages/reaction', { to, message_id, emoji }, { headers: this._headers() });
+    }
+
+    /**
+     * Mark a received message as read.
+     * @param {string} messageId - wamid of the message
+     */
+    async markRead(messageId) {
+        return this._http.post('/messages/read', { message_id: messageId }, { headers: this._headers() });
+    }
 }
 
 module.exports = Messages;

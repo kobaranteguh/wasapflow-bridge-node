@@ -54,24 +54,60 @@ export interface SendListOptions {
     footer?: string;
 }
 
+export interface SendLocationOptions {
+    to: string;
+    latitude: number;
+    longitude: number;
+    name?: string;
+    address?: string;
+}
+
+export interface SendReactionOptions {
+    to: string;
+    message_id: string;
+    emoji: string;
+}
+
+export interface CreateTemplateOptions {
+    name: string;
+    language: string;
+    category: 'MARKETING' | 'UTILITY' | 'AUTHENTICATION';
+    components: object[];
+}
+
+export interface CreateBroadcastOptions {
+    templateName: string;
+    templateLanguage?: string;
+    templateComponents?: object[];
+    contacts: string[] | Array<{ phone: string; params?: object }>;
+    name?: string;
+    scheduledAt?: string;
+}
+
+export interface UpdateProfileOptions {
+    about?: string;
+    address?: string;
+    description?: string;
+    email?: string;
+    websites?: string[];
+    vertical?: string;
+}
+
 export interface BridgeEvent {
     event: 'message.received' | 'message.sent' | 'message.delivered' | 'message.read' | 'message.failed' | 'waba.tier_updated' | 'waba.quality_updated' | 'waba.alert';
     waba_id: string;
     phone_number_id: string;
     timestamp: number;
     data: {
-        // message.received
         from?: string;
         message_id?: string;
         type?: string;
         text?: string | null;
         contact_name?: string | null;
         raw?: object;
-        // status events
         status?: string;
         recipient?: string;
         errors?: object[] | null;
-        // waba events
         tier?: string;
         quality_rating?: string;
         previous_rating?: string;
@@ -87,6 +123,9 @@ export declare class Messages {
     video(opts: SendMediaOptions): Promise<{ success: true; message_id: string }>;
     buttons(opts: SendButtonsOptions): Promise<{ success: true; message_id: string }>;
     list(opts: SendListOptions): Promise<{ success: true; message_id: string }>;
+    location(opts: SendLocationOptions): Promise<{ success: true; message_id: string }>;
+    reaction(opts: SendReactionOptions): Promise<{ success: true }>;
+    markRead(messageId: string): Promise<{ success: true }>;
 }
 
 export declare class Clients {
@@ -99,6 +138,29 @@ export declare class Clients {
 export declare class Contacts {
     check(phone: string, wabaId?: string): Promise<{ success: true; phone: string; whatsapp_id: string | null; status: string }>;
     uploadMedia(opts: { url: string; mimeType: string; wabaId: string; type?: string }): Promise<{ success: true; media_id: string }>;
+    downloadMedia(mediaId: string, wabaId: string): Promise<{ success: true; url: string; mime_type: string; file_size: number }>;
+}
+
+export declare class Templates {
+    list(wabaId: string): Promise<{ success: true; templates: object[] }>;
+    create(wabaId: string, opts: CreateTemplateOptions): Promise<{ success: true; template: object }>;
+    delete(wabaId: string, templateName: string): Promise<{ success: true }>;
+}
+
+export declare class Broadcasts {
+    create(wabaId: string, opts: CreateBroadcastOptions): Promise<{ success: true; broadcast_id: number; status: string }>;
+    list(opts?: { limit?: number; offset?: number }): Promise<{ success: true; broadcasts: object[] }>;
+    get(broadcastId: number | string): Promise<{ success: true; broadcast: object }>;
+    cancel(broadcastId: number | string): Promise<{ success: true }>;
+}
+
+export declare class Analytics {
+    get(wabaId: string, opts?: { days?: number }): Promise<{ success: true; analytics: object }>;
+}
+
+export declare class Profile {
+    get(wabaId: string): Promise<{ success: true; profile: object }>;
+    update(wabaId: string, opts: UpdateProfileOptions): Promise<{ success: true }>;
 }
 
 export declare class Webhooks {
@@ -107,10 +169,36 @@ export declare class Webhooks {
     isValid(headers: Record<string, string>, rawBody: Buffer | string): boolean;
 }
 
+export interface ClientScope {
+    messages: Messages;
+    templates: {
+        list(): Promise<{ success: true; templates: object[] }>;
+        create(opts: CreateTemplateOptions): Promise<{ success: true; template: object }>;
+        delete(name: string): Promise<{ success: true }>;
+    };
+    broadcasts: {
+        create(opts: CreateBroadcastOptions): Promise<{ success: true; broadcast_id: number; status: string }>;
+        list(opts?: { limit?: number; offset?: number }): Promise<{ success: true; broadcasts: object[] }>;
+        get(id: number | string): Promise<{ success: true; broadcast: object }>;
+        cancel(id: number | string): Promise<{ success: true }>;
+    };
+    analytics: {
+        get(opts?: { days?: number }): Promise<{ success: true; analytics: object }>;
+    };
+    profile: {
+        get(): Promise<{ success: true; profile: object }>;
+        update(opts: UpdateProfileOptions): Promise<{ success: true }>;
+    };
+}
+
 export declare class WasapFlowBridge {
     constructor(config: BridgeConfig);
-    clients: Clients;
-    contacts: Contacts;
-    webhooks: Webhooks;
-    client(wabaId: string): { messages: Messages };
+    clients:    Clients;
+    contacts:   Contacts;
+    webhooks:   Webhooks;
+    templates:  Templates;
+    broadcasts: Broadcasts;
+    analytics:  Analytics;
+    profile:    Profile;
+    client(wabaId: string): ClientScope;
 }

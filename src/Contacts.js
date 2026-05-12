@@ -32,6 +32,15 @@ class Contacts {
             headers: { 'x-waba-id': wabaId }
         });
     }
+
+    /**
+     * Get a download URL for a media file received via webhook.
+     * @param {string} mediaId - Meta media_id from an inbound webhook
+     * @param {string} wabaId  - WABA ID that received the media
+     */
+    async downloadMedia(mediaId, wabaId) {
+        return this._http.get(`/media/${encodeURIComponent(mediaId)}`, { headers: { 'x-waba-id': wabaId } });
+    }
 }
 
 module.exports = Contacts;
