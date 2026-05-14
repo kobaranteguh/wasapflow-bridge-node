@@ -39,10 +39,24 @@ class Clients {
 
     /**
      * Refresh quality rating and tier for a WABA from Meta.
+     * Optionally update the stored access token.
+     * @param {string} wabaId
+     * @param {object} [opts]
+     * @param {string} [opts.accessToken] - New access token to store (optional)
+     */
+    async refresh(wabaId, { accessToken } = {}) {
+        const body = accessToken ? { access_token: accessToken } : {};
+        return this._http.post(`/clients/${wabaId}/refresh`, body);
+    }
+
+    /**
+     * Reconnect Meta webhook for a WABA.
+     * Call this if a client's webhook events (messages, delivery receipts) stop arriving.
+     * Safe to call at any time — idempotent.
      * @param {string} wabaId
      */
-    async refresh(wabaId) {
-        return this._http.post(`/clients/${wabaId}/refresh`);
+    async resubscribeWebhook(wabaId) {
+        return this._http.post(`/clients/${wabaId}/resubscribe-webhook`);
     }
 }
 
