@@ -23,6 +23,27 @@ class Clients {
     }
 
     /**
+     * Register a WABA using an Embedded Signup code.
+     * The platform exchanges the code server-side — your app never sees the Meta access token.
+     * @param {object} opts
+     * @param {string} opts.code         - OAuth code from FB.login authResponse
+     * @param {string} [opts.displayName] - Friendly name for this client
+     */
+    async registerFromCode({ code, displayName } = {}) {
+        return this._http.post('/clients/register-from-code', {
+            code,
+            display_name: displayName || ''
+        });
+    }
+
+    /**
+     * Get Embedded Signup config (Meta App ID and Config ID) for your frontend.
+     */
+    async getEmbeddedSignupConfig() {
+        return this._http.get('/embedded-signup/config');
+    }
+
+    /**
      * List all registered WABAs for this partner.
      */
     async list() {
