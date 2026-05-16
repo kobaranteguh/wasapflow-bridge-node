@@ -44,6 +44,43 @@ class Clients {
     }
 
     /**
+     * Open WasapFlow hosted Embedded Signup popup.
+     * FB.init runs on officialapi.wasapflow.com — Meta only sees WasapFlow.
+     * Your client stays on your platform. No domain whitelist needed.
+     *
+     * @param {object} [opts]
+     * @param {string} [opts.displayName] - Display name for the client WABA
+     * @param {string} [opts.baseUrl]     - Override WasapFlow base URL
+     * @returns {Promise<{waba_id, phone_number_id, display_name, quality_rating}>}
+     */
+    openEmbeddedSignup({ displayName = '', baseUrl } = {}) {
+        const base = (baseUrl || this._http._baseUrl || 'https://officialapi.wasapflow.com').replace(/\/$/, '');
+        const key  = this._http._partnerKey;
+        const url  = `${base}/bridge/connect?partner_key=${encodeURIComponent(key)}&display_name=${encodeURIComponent(displayName)}`;
+
+        return new Promise((resolve, reject) => {
+            const popup = window.open(url, 'wasapflow_connect', 'width=480,height=600,left=200,top=100');
+            if (!popup) return reject(new Error('Popup blocked. Please allow popups and try again.'));
+
+            const handler = (event) => {
+                if (event.data?.type === 'WASAPFLOW_CONNECT_SUCCESS') {
+                    window.removeEventListener('message', handler);
+                    resolve(event.data);
+                }
+            };
+            window.addEventListener('message', handler);
+
+            const checkClosed = setInterval(() => {
+                if (popup.closed) {
+                    clearInterval(checkClosed);
+                    window.removeEventListener('message', handler);
+                    reject(new Error('Popup closed without completing signup'));
+                }
+            }, 500);
+        });
+    }
+
+    /**
      * List all registered WABAs for this partner.
      */
     async list() {
