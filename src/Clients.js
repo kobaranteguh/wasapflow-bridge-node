@@ -28,11 +28,13 @@ class Clients {
      * @param {object} opts
      * @param {string} opts.code         - OAuth code from FB.login authResponse
      * @param {string} [opts.displayName] - Friendly name for this client
+     * @param {string} [opts.connectionMode] - "coexistence" for WhatsApp Business App onboarding
      */
-    async registerFromCode({ code, displayName } = {}) {
+    async registerFromCode({ code, displayName, connectionMode = 'coexistence' } = {}) {
         return this._http.post('/clients/register-from-code', {
             code,
-            display_name: displayName || ''
+            display_name: displayName || '',
+            connection_mode: connectionMode
         });
     }
 

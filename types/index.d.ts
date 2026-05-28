@@ -100,6 +100,14 @@ export interface BridgeEvent {
     timestamp: number;
     data: {
         from?: string;
+        /**
+         * 🆔 Business-Scoped User ID (added by Meta April 2026).
+         * Format: `CC.xxx` (e.g. `MY.2035200694071263`). Unique per business-user pair.
+         * Stable identifier that won't change when user adopts a WhatsApp username
+         * (rollout starting June 2026). Recommended: store this alongside `from`
+         * as a future-proof customer key.
+         */
+        bsuid?: string | null;
         message_id?: string;
         type?: string;
         text?: string | null;
@@ -107,6 +115,11 @@ export interface BridgeEvent {
         raw?: object;
         status?: string;
         recipient?: string;
+        /**
+         * 🆔 Recipient's Business-Scoped User ID for outbound status webhooks
+         * (message.sent / delivered / read / failed). See `bsuid` above.
+         */
+        recipient_bsuid?: string | null;
         errors?: object[] | null;
         tier?: string;
         quality_rating?: string;

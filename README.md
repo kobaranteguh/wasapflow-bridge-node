@@ -133,7 +133,10 @@ app.post('/webhook', express.raw({ type: 'application/json' }), (req, res) => {
 
     switch (event.event) {
         case 'message.received':
-            console.log(`📩 Message from ${event.data.from}: ${event.data.text}`);
+            // 🆔 event.data.bsuid is the Business-Scoped User ID — a stable
+            // identifier that survives WhatsApp username changes (rollout Jun 2026).
+            // Recommended: store BOTH `from` (phone) and `bsuid` for each contact.
+            console.log(`📩 Message from ${event.data.from} (bsuid: ${event.data.bsuid}): ${event.data.text}`);
             break;
 
         case 'message.delivered':
